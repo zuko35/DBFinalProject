@@ -263,15 +263,15 @@ def login_user(email, password):
             return cur.fetchone()
 
 
-def register_user(username, email, password):
+def register_user(userid, username, email, password):
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
-                    INSERT INTO Users (user_name, email, password)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO Users (user_id, user_name, email, password)
+                    VALUES (%s, %s, %s, %s)
                     RETURNING user_id
-                """, (username, email, password))
+                """, (userid, username, email, password))
                 uid = cur.fetchone()["user_id"]
             conn.commit()
             return uid, None

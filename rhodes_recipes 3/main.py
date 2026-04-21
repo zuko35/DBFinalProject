@@ -1,3 +1,5 @@
+import time
+
 from nicegui import ui, app
 import database as db
 
@@ -166,7 +168,7 @@ def open_recipe_dialog(recipe_id: int):
 
     with ui.dialog() as dlg, ui.card().style(
         f"min-width:520px; max-width:700px; background:{CREAM}; "
-        "border-radius:16px; overflow:hidden; padding:0;"
+        "border-radius:16px; overflow:scroll; padding:0;"
     ):
         # Header strip
         ui.element("div").style(
@@ -437,10 +439,12 @@ def show_login_page():
                         inp_remail= ui.input("Email").style("width:100%;")
                         inp_rpw   = ui.input("Password", password=True).style("width:100%;")
                         lbl_rerr  = ui.label("").style(f"color:{RUST}; font-size:0.85rem;")
+                        timestamp = int(time.time())
+                        inp_rid = f"ID-{timestamp}"
 
                         def do_register():
                             uid, err = db.register_user(
-                                inp_name.value, inp_remail.value, inp_rpw.value
+                                inp_rid, inp_name.value, inp_remail.value, inp_rpw.value
                             )
                             if uid:
                                 current_user["id"]   = uid
