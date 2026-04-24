@@ -56,6 +56,31 @@ def star_display(rating: float):
     return "★" * full + "☆" * empty
 
 
+def drink_card(drink: dict, on_click_fn):
+    stars = star_display(float(drink.get("avg_rating") or 0))
+    with ui.card().style(
+        f"background:{WHITE}; border-radius:12px; width:280px; cursor:pointer; "
+        "box-shadow:0 2px 10px rgba(0,0,0,.12); transition:transform .15s,box-shadow .15s; "
+        "overflow:hidden; flex-shrink:0;"
+    ).on("click", lambda d=drink: on_click_fn(d["drink_id"])):
+        ui.element("div").style(
+            f"background:{SAGE}; height:8px; width:100%;"
+        )
+        with ui.column().style("padding:16px; gap:6px;"):
+            ui.label(drink["drink_name"]).style(
+                f"font-size:1.05rem; font-weight:700; color:{BROWN}; "
+                "font-family:'Georgia',serif;"
+            )
+            ui.label("🥤 Beverage").style(
+                f"font-size:0.82rem; color:{GRAY}; line-height:1.4;"
+            )
+            with ui.row().style("justify-content:space-between; margin-top:6px;"):
+                ui.label(stars).style(f"color:{GOLD}; font-size:1rem;")
+                ui.label(f"{drink.get('rating_count', 0)} rating(s)").style(
+                    f"font-size:0.78rem; color:{GRAY};"
+                )
+
+
 def recipe_card(recipe: dict, on_click_fn):
     stars = star_display(float(recipe.get("avg_rating") or 0))
     with ui.card().style(
@@ -101,64 +126,132 @@ def recipe_card(recipe: dict, on_click_fn):
 @ui.page("/")
 def show_home():
     ui.query("body").style(f"background:{CREAM}; margin:0;")
-    header("Browse Recipes")
+    header("Browse Recipes & Drinks")
 
     with ui.column().style("padding:24px 32px; gap:20px; max-width:1200px; margin:auto;"):
 
-        # ── Filter bar ───────────────────────────────────────────────────────
-        with ui.card().style(
-            f"background:{WHITE}; border-radius:12px; padding:20px; "
-            "box-shadow:0 2px 8px rgba(0,0,0,.08);"
-        ):
-            ui.label("🔍 Filter Recipes").style(
-                f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
-                "font-family:'Georgia',serif; margin-bottom:12px;"
-            )
-            with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
-
-                cuisines   = ["All"] + db.get_cuisines()
-                meal_types = ["All"] + db.get_meal_types()
-                allergens  = ["None"] + db.get_allergens()
-
-                sel_cuisine  = ui.select(cuisines,   value="All",  label="Cuisine").style("min-width:140px;")
-                sel_type     = ui.select(meal_types, value="All",  label="Meal Type").style("min-width:140px;")
-                sel_allergen = ui.select(allergens,  value="None", label="Exclude Allergen").style("min-width:160px;")
-                inp_ingredient = ui.input(placeholder="e.g. potatoes", label="Key Ingredient").style("min-width:160px;")
-                inp_time     = ui.number(label="Max Cook Time (min)", min=1, max=300, step=5).style("min-width:160px;")
-
-                results_row  = ui.row().style("flex-wrap:wrap; gap:16px; margin-top:4px;")
-
-                def run_search():
-                    results_row.clear()
-                    recipes = db.search_recipes(
-                        cuisine         = sel_cuisine.value,
-                        meal_type       = sel_type.value,
-                        max_cook_time   = inp_time.value,
-                        allergen_exclude= sel_allergen.value,
-                        ingredient      = inp_ingredient.value or None,
-                    )
-                    with results_row:
-                        if recipes:
-                            for r in recipes:
-                                recipe_card(r, open_recipe_dialog)
-                        else:
-                            ui.label("No recipes found — try adjusting your filters.").style(
-                                f"color:{GRAY}; font-style:italic; padding:16px;"
-                            )
-
-                ui.button("Search", on_click=run_search).style(
-                    f"background:{RUST}; color:{WHITE}; font-weight:600; "
-                    "border-radius:8px; padding:8px 24px;"
-                )
-
-        # ── Initial results ──────────────────────────────────────────────────
-        ui.label("All Recipes").style(
-            f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
-            "font-family:'Georgia',serif;"
+        # ── Tab toggle ───────────────────────────────────────────────────────
+        tabs = ui.tabs().style(
+            f"color:{RUST}; background:{WHITE}; border-radius:12px; "
+            "box-shadow:0 2px 8px rgba(0,0,0,.08); padding:4px;"
         )
-        with ui.row().style("flex-wrap:wrap; gap:16px;") as initial_row:
-            for r in db.search_recipes():
-                recipe_card(r, open_recipe_dialog)
+        with tabs:
+            tab_recipes = ui.tab("🍴 Recipes")
+            tab_drinks  = ui.tab("🥤 Drinks")
+
+        with ui.tab_panels(tabs, value=tab_recipes).style(
+            f"background:transparent; width:100%;"
+        ):
+
+            # ════════════════════════ RECIPES TAB ═══════════════════════════
+            with ui.tab_panel(tab_recipes):
+                with ui.card().style(
+                    f"background:{WHITE}; border-radius:12px; padding:20px; "
+                    "box-shadow:0 2px 8px rgba(0,0,0,.08);"
+                ):
+                    ui.label("🔍 Filter Recipes").style(
+                        f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
+                        "font-family:'Georgia',serif; margin-bottom:12px;"
+                    )
+                    with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
+
+                        cuisines   = ["All"] + db.get_cuisines()
+                        meal_types = ["All"] + db.get_meal_types()
+                        allergens  = ["None"] + db.get_allergens()
+
+                        sel_cuisine  = ui.select(cuisines,   value="All",  label="Cuisine").style("min-width:140px;")
+                        sel_type     = ui.select(meal_types, value="All",  label="Meal Type").style("min-width:140px;")
+                        sel_allergen = ui.select(allergens,  value="None", label="Exclude Allergen").style("min-width:160px;")
+                        inp_ingredient = ui.input(placeholder="e.g. potatoes", label="Key Ingredient").style("min-width:160px;")
+                        inp_time     = ui.number(label="Max Cook Time (min)", min=1, max=300, step=5).style("min-width:160px;")
+
+                        results_row  = ui.row().style("flex-wrap:wrap; gap:16px; margin-top:4px;")
+
+                        def run_search():
+                            results_row.clear()
+                            recipes = db.search_recipes(
+                                cuisine         = sel_cuisine.value,
+                                meal_type       = sel_type.value,
+                                max_cook_time   = inp_time.value,
+                                allergen_exclude= sel_allergen.value,
+                                ingredient      = inp_ingredient.value or None,
+                            )
+                            with results_row:
+                                if recipes:
+                                    for r in recipes:
+                                        recipe_card(r, open_recipe_dialog)
+                                else:
+                                    ui.label("No recipes found — try adjusting your filters.").style(
+                                        f"color:{GRAY}; font-style:italic; padding:16px;"
+                                    )
+
+                        ui.button("Search", on_click=run_search).style(
+                            f"background:{RUST}; color:{WHITE}; font-weight:600; "
+                            "border-radius:8px; padding:8px 24px;"
+                        )
+
+                ui.label("All Recipes").style(
+                    f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
+                    "font-family:'Georgia',serif; margin-top:16px;"
+                )
+                with ui.row().style("flex-wrap:wrap; gap:16px;"):
+                    for r in db.search_recipes():
+                        recipe_card(r, open_recipe_dialog)
+
+            # ════════════════════════ DRINKS TAB ════════════════════════════
+            with ui.tab_panel(tab_drinks):
+                with ui.card().style(
+                    f"background:{WHITE}; border-radius:12px; padding:20px; "
+                    "box-shadow:0 2px 8px rgba(0,0,0,.08);"
+                ):
+                    ui.label("🔍 Filter Drinks").style(
+                        f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
+                        "font-family:'Georgia',serif; margin-bottom:12px;"
+                    )
+                    with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
+
+                        d_allergens = ["None"] + db.get_allergens()
+
+                        d_inp_ingredient = ui.input(
+                            placeholder="e.g. lemon", label="Key Ingredient"
+                        ).style("min-width:160px;")
+                        d_sel_allergen = ui.select(
+                            d_allergens, value="None", label="Exclude Allergen"
+                        ).style("min-width:160px;")
+                        d_sel_min_rating = ui.select(
+                            [0, 1, 2, 3, 4, 5], value=0, label="Min Avg Rating"
+                        ).style("min-width:140px;")
+
+                        d_results_row = ui.row().style("flex-wrap:wrap; gap:16px; margin-top:4px;")
+
+                        def run_drink_search():
+                            d_results_row.clear()
+                            drinks = db.search_drinks(
+                                ingredient       = d_inp_ingredient.value or None,
+                                allergen_exclude = d_sel_allergen.value,
+                                min_rating       = d_sel_min_rating.value or None,
+                            )
+                            with d_results_row:
+                                if drinks:
+                                    for d in drinks:
+                                        drink_card(d, open_drink_dialog)
+                                else:
+                                    ui.label("No drinks found — try adjusting your filters.").style(
+                                        f"color:{GRAY}; font-style:italic; padding:16px;"
+                                    )
+
+                        ui.button("Search", on_click=run_drink_search).style(
+                            f"background:{RUST}; color:{WHITE}; font-weight:600; "
+                            "border-radius:8px; padding:8px 24px;"
+                        )
+
+                ui.label("All Drinks").style(
+                    f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
+                    "font-family:'Georgia',serif; margin-top:16px;"
+                )
+                with ui.row().style("flex-wrap:wrap; gap:16px;"):
+                    for d in db.search_drinks():
+                        drink_card(d, open_drink_dialog)
 
 
 def open_recipe_dialog(recipe_id: int):
@@ -284,29 +377,93 @@ def open_drink_dialog(drink_id: int):
     if not drink:
         return
     with ui.dialog() as dlg, ui.card().style(
-        f"min-width:400px; max-width:500px; background:{CREAM}; border-radius:16px; overflow:hidden; padding:0;"
+        f"min-width:520px; max-width:700px; background:{CREAM}; "
+        "border-radius:16px; overflow:scroll; padding:0;"
     ):
-        with ui.column().style("padding:20px 24px; gap:12px;"):
-            ui.label(drink["drink_name"]).style(
-                f"font-size:1.3rem; font-weight:800; color:{BROWN}; font-family:Georgia,serif;"
+        # Header strip (mirrors recipe dialog styling)
+        ui.element("div").style(
+            f"background:{SAGE}; padding:20px 24px;"
+        ).add_slot("default", f"""
+            <span style="color:{CREAM}; font-size:1.4rem; font-weight:800;
+            font-family:Georgia,serif;">{drink['drink_name']}</span><br>
+            <span style="color:rgba(255,255,255,.85); font-size:0.85rem;">
+            🥤 Beverage</span>
+        """)
+
+        with ui.column().style("padding:20px 24px; gap:14px;"):
+            # Rating
+            avg = float(drink.get("avg_rating") or 0)
+            ui.label(f"{star_display(avg)}  ({drink.get('rating_count', 0)} ratings)").style(
+                f"color:{GOLD}; font-size:1.1rem;"
             )
-            ui.label(f"⭐ {drink['avg_rating']} / 5  ({drink['rating_count']} ratings)").style(
-                f"color:{SAGE}; font-weight:600;"
+
+            # Ingredients table (with cost + allergen, like recipes)
+            ui.label("Ingredients").style(
+                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
-            if ingredients:
-                ui.label("Ingredients").style(f"font-weight:700; color:{BROWN};")
-                cols = [{"name":"name","label":"Ingredient","field":"name","align":"left"},{"name":"qty","label":"Qty","field":"qty"},{"name":"unit","label":"Unit","field":"unit"}]
-                rows = [{"name":i["ingredient_name"],"qty":str(i["quantity"]),"unit":i["unit"]} for i in ingredients]
+            with ui.element("div").style(
+                f"background:{WHITE}; border-radius:8px; overflow:hidden; "
+                "box-shadow:0 1px 4px rgba(0,0,0,.08);"
+            ):
+                cols = [
+                    {"name":"ingredient","label":"Ingredient","field":"ingredient_name","align":"left"},
+                    {"name":"qty",       "label":"Qty",        "field":"qty"},
+                    {"name":"unit",      "label":"Unit",       "field":"unit"},
+                    {"name":"cost",      "label":"Cost/Unit",  "field":"cost"},
+                    {"name":"allergen",  "label":"Allergen",   "field":"allergen"},
+                ]
+                rows = [
+                    {
+                        "ingredient_name": i["ingredient_name"],
+                        "qty":  str(i["quantity"]),
+                        "unit": i["unit"],
+                        "cost": f"${float(i['cost_per_unit']):.2f}" if i.get("cost_per_unit") else "—",
+                        "allergen": i.get("allergen_name") or "—",
+                    }
+                    for i in ingredients
+                ]
                 ui.table(columns=cols, rows=rows).style("font-size:0.85rem;")
-            if current_user["id"]:
-                with ui.row().style("gap:10px; align-items:center; margin-top:4px;"):
-                    ui.label("Rate:").style(f"color:{BROWN}; font-size:0.9rem;")
-                    sel = ui.select([1,2,3,4,5], value=3).style("width:80px;")
+
+            # Estimated total cost
+            total_cost = sum(
+                float(i["quantity"]) * float(i["cost_per_unit"] or 0)
+                for i in ingredients
+            )
+            if total_cost > 0:
+                ui.label(f"Estimated cost: ${total_cost:.2f}").style(
+                    f"color:{SAGE}; font-weight:600; font-size:0.85rem;"
+                )
+
+            # Action buttons
+            with ui.row().style("gap:10px; margin-top:8px; flex-wrap:wrap;"):
+                if current_user["id"]:
+                    def do_save_drink(did=drink_id):
+                        db.save_drink(current_user["id"], did)
+                        ui.notify("Drink saved to your list! 🥤", color="positive")
+
+                    ui.button("💾 Save Drink", on_click=do_save_drink).style(
+                        f"background:{SAGE}; color:{WHITE}; font-weight:600; border-radius:8px;"
+                    )
+
+                    ui.label("Rate:").style(f"color:{BROWN}; align-self:center; font-size:0.9rem;")
+                    sel_drink_rating = ui.select([1,2,3,4,5], value=3).style("width:80px;")
+
                     def do_rate_drink(did=drink_id):
-                        db.rate_drink(current_user["id"], did, sel.value)
-                        ui.notify("Drink rated! 🥤", color="positive")
-                    ui.button("Submit", on_click=do_rate_drink).style(f"background:{GOLD}; color:{BROWN}; font-weight:600; border-radius:8px;")
-            ui.button("Close", on_click=dlg.close).props("flat").style(f"color:{RUST}; font-weight:600;")
+                        db.rate_drink(current_user["id"], did, sel_drink_rating.value)
+                        ui.notify("Rating submitted! ⭐", color="positive")
+
+                    ui.button("Submit Rating", on_click=do_rate_drink).style(
+                        f"background:{GOLD}; color:{BROWN}; font-weight:600; border-radius:8px;"
+                    )
+                else:
+                    ui.label("Log in to save or rate drinks.").style(
+                        f"color:{GRAY}; font-size:0.85rem; font-style:italic;"
+                    )
+
+                ui.button("Close", on_click=dlg.close).props("flat").style(
+                    f"color:{RUST}; font-weight:600;"
+                )
+
     dlg.open()
 
 @ui.page("/saved")
@@ -316,77 +473,152 @@ def show_saved_page():
         return
 
     ui.query("body").style(f"background:{CREAM}; margin:0;")
-    header("My Saved Recipes")
+    header("My Saved")
 
     with ui.column().style("padding:24px 32px; gap:20px; max-width:1200px; margin:auto;"):
 
-        saved = db.get_saved_recipes(current_user["id"])
-        shopping = db.get_shopping_list(current_user["id"])
+        saved          = db.get_saved_recipes(current_user["id"])
+        shopping       = db.get_shopping_list(current_user["id"])
+        saved_drinks   = db.get_saved_drinks(current_user["id"])
+        drink_shopping = db.get_drink_shopping_list(current_user["id"])
 
         with ui.row().style("align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;"):
-            ui.label(f"You have {len(saved)} saved recipe(s)").style(
+            ui.label("My Saved Items").style(
                 f"font-size:1.3rem; font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
             ui.button("🏠 Back to Browse", on_click=lambda: ui.navigate.to("/")).style(
                 f"background:{RUST}; color:{WHITE}; border-radius:8px; font-weight:600;"
             )
 
-        if saved:
-            with ui.row().style("flex-wrap:wrap; gap:16px;"):
-                for r in saved:
-                    with ui.card().style(
-                        f"background:{WHITE}; border-radius:12px; width:260px; "
-                        "box-shadow:0 2px 8px rgba(0,0,0,.1);"
-                    ):
-                        with ui.column().style("padding:16px; gap:6px;"):
-                            ui.label(r["recipe_name"]).style(
-                                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
-                            )
-                            ui.label(f"{r['cuisine']} · {r['type']} · ⏱ {r['cook_time']} min").style(
-                                f"font-size:0.8rem; color:{GRAY};"
-                            )
-                            def do_remove(rid=r["recipe_id"]):
-                                db.remove_saved_recipe(current_user["id"], rid)
-                                ui.navigate.to("/saved")
-                            ui.button("Remove", on_click=do_remove).props("flat dense").style(
-                                f"color:{RUST}; font-size:0.8rem;"
-                            )
+        # ── Tabs: saved recipes / saved drinks ───────────────────────────
+        s_tabs = ui.tabs().style(
+            f"color:{RUST}; background:{WHITE}; border-radius:12px; "
+            "box-shadow:0 2px 8px rgba(0,0,0,.08); padding:4px;"
+        )
+        with s_tabs:
+            s_tab_recipes = ui.tab(f"🍴 Recipes ({len(saved)})")
+            s_tab_drinks  = ui.tab(f"🥤 Drinks ({len(saved_drinks)})")
 
-            # Shopping list
-            ui.label("🛒 Shopping List").style(
-                f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
-                "font-family:Georgia,serif; margin-top:12px;"
-            )
-            if shopping:
-                total = sum(float(i.get("line_cost") or 0) for i in shopping)
-                cols = [
-                    {"name":"ingredient","label":"Ingredient","field":"ingredient_name","align":"left"},
-                    {"name":"qty",       "label":"Total Qty", "field":"qty"},
-                    {"name":"unit",      "label":"Unit",      "field":"unit"},
-                    {"name":"cost",      "label":"Est. Cost", "field":"cost"},
-                ]
-                rows = [
-                    {
-                        "ingredient_name": i["ingredient_name"],
-                        "qty":  str(i["total_quantity"]),
-                        "unit": i["unit"],
-                        "cost": f"${float(i['line_cost']):.2f}" if i["line_cost"] else "—",
-                    }
-                    for i in shopping
-                ]
-                with ui.card().style(
-                    f"background:{WHITE}; border-radius:12px; "
-                    "box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden;"
-                ):
-                    ui.table(columns=cols, rows=rows).style("font-size:0.9rem;")
-                    ui.label(f"Estimated Total: ${total:.2f}").style(
-                        f"color:{SAGE}; font-weight:700; padding:12px 16px; "
-                        f"background:{CREAM}; text-align:right;"
+        with ui.tab_panels(s_tabs, value=s_tab_recipes).style(
+            f"background:transparent; width:100%;"
+        ):
+
+            # ════════════════════ SAVED RECIPES TAB ═════════════════════
+            with ui.tab_panel(s_tab_recipes):
+                if saved:
+                    with ui.row().style("flex-wrap:wrap; gap:16px;"):
+                        for r in saved:
+                            with ui.card().style(
+                                f"background:{WHITE}; border-radius:12px; width:260px; "
+                                "box-shadow:0 2px 8px rgba(0,0,0,.1);"
+                            ):
+                                with ui.column().style("padding:16px; gap:6px;"):
+                                    ui.label(r["recipe_name"]).style(
+                                        f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
+                                    )
+                                    ui.label(f"{r['cuisine']} · {r['type']} · ⏱ {r['cook_time']} min").style(
+                                        f"font-size:0.8rem; color:{GRAY};"
+                                    )
+                                    def do_remove(rid=r["recipe_id"]):
+                                        db.remove_saved_recipe(current_user["id"], rid)
+                                        ui.navigate.to("/saved")
+                                    ui.button("Remove", on_click=do_remove).props("flat dense").style(
+                                        f"color:{RUST}; font-size:0.8rem;"
+                                    )
+
+                    ui.label("🛒 Recipe Shopping List").style(
+                        f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
+                        "font-family:Georgia,serif; margin-top:12px;"
                     )
-        else:
-            ui.label("No saved recipes yet — browse and save some!").style(
-                f"color:{GRAY}; font-style:italic;"
-            )
+                    if shopping:
+                        total = sum(float(i.get("line_cost") or 0) for i in shopping)
+                        cols = [
+                            {"name":"ingredient","label":"Ingredient","field":"ingredient_name","align":"left"},
+                            {"name":"qty",       "label":"Total Qty", "field":"qty"},
+                            {"name":"unit",      "label":"Unit",      "field":"unit"},
+                            {"name":"cost",      "label":"Est. Cost", "field":"cost"},
+                        ]
+                        rows = [
+                            {
+                                "ingredient_name": i["ingredient_name"],
+                                "qty":  str(i["total_quantity"]),
+                                "unit": i["unit"],
+                                "cost": f"${float(i['line_cost']):.2f}" if i["line_cost"] else "—",
+                            }
+                            for i in shopping
+                        ]
+                        with ui.card().style(
+                            f"background:{WHITE}; border-radius:12px; "
+                            "box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden;"
+                        ):
+                            ui.table(columns=cols, rows=rows).style("font-size:0.9rem;")
+                            ui.label(f"Estimated Total: ${total:.2f}").style(
+                                f"color:{SAGE}; font-weight:700; padding:12px 16px; "
+                                f"background:{CREAM}; text-align:right;"
+                            )
+                else:
+                    ui.label("No saved recipes yet — browse and save some!").style(
+                        f"color:{GRAY}; font-style:italic;"
+                    )
+
+            # ════════════════════ SAVED DRINKS TAB ══════════════════════
+            with ui.tab_panel(s_tab_drinks):
+                if saved_drinks:
+                    with ui.row().style("flex-wrap:wrap; gap:16px;"):
+                        for d in saved_drinks:
+                            with ui.card().style(
+                                f"background:{WHITE}; border-radius:12px; width:260px; "
+                                "box-shadow:0 2px 8px rgba(0,0,0,.1);"
+                            ):
+                                with ui.column().style("padding:16px; gap:6px;"):
+                                    ui.label(d["drink_name"]).style(
+                                        f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
+                                    )
+                                    stars = star_display(float(d.get("avg_rating") or 0))
+                                    ui.label(f"{stars}  ({d.get('rating_count', 0)} ratings)").style(
+                                        f"font-size:0.8rem; color:{GOLD};"
+                                    )
+                                    def do_remove_drink(did=d["drink_id"]):
+                                        db.remove_saved_drink(current_user["id"], did)
+                                        ui.navigate.to("/saved")
+                                    ui.button("Remove", on_click=do_remove_drink).props("flat dense").style(
+                                        f"color:{RUST}; font-size:0.8rem;"
+                                    )
+
+                    ui.label("🛒 Drinks Shopping List").style(
+                        f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
+                        "font-family:Georgia,serif; margin-top:12px;"
+                    )
+                    if drink_shopping:
+                        d_total = sum(float(i.get("line_cost") or 0) for i in drink_shopping)
+                        d_cols = [
+                            {"name":"ingredient","label":"Ingredient","field":"ingredient_name","align":"left"},
+                            {"name":"qty",       "label":"Total Qty", "field":"qty"},
+                            {"name":"unit",      "label":"Unit",      "field":"unit"},
+                            {"name":"cost",      "label":"Est. Cost", "field":"cost"},
+                        ]
+                        d_rows = [
+                            {
+                                "ingredient_name": i["ingredient_name"],
+                                "qty":  str(i["total_quantity"]),
+                                "unit": i["unit"],
+                                "cost": f"${float(i['line_cost']):.2f}" if i["line_cost"] else "—",
+                            }
+                            for i in drink_shopping
+                        ]
+                        with ui.card().style(
+                            f"background:{WHITE}; border-radius:12px; "
+                            "box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden;"
+                        ):
+                            ui.table(columns=d_cols, rows=d_rows).style("font-size:0.9rem;")
+                            ui.label(f"Estimated Total: ${d_total:.2f}").style(
+                                f"color:{SAGE}; font-weight:700; padding:12px 16px; "
+                                f"background:{CREAM}; text-align:right;"
+                            )
+                else:
+                    ui.label("No saved drinks yet — browse and save some!").style(
+                        f"color:{GRAY}; font-style:italic;"
+                    )
 
 
 @ui.page("/login")

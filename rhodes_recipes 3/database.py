@@ -127,15 +127,125 @@ def get_drink_detail(drink_id):
             drink = cur.fetchone()
 
             cur.execute("""
-                SELECT i.ingredient_name, di.quantity, i.unit
+                SELECT i.ingredient_name, di.quantity, i.unit,
+                       i.cost_per_unit, a.allergen_name
                 FROM DrinkIngredients di
-                JOIN Ingredients i ON di.ingredient_id = i.ingredient_id
+                JOIN Ingredients i      ON di.ingredient_id = i.ingredient_id
+                LEFT JOIN Allergens a   ON i.allergy_id = a.allergen_id
                 WHERE di.drink_id = %s
                 ORDER BY i.ingredient_name
             """, (drink_id,))
             ingredients = cur.fetchall()
 
     return drink, ingredients
+
+
+def search_drinks(ingredient=None, allergen_exclude=None, min_rating=None):
+    """
+    Filter drinks by key ingredient, excluded allergen, and minimum
+    average rating. Returns drink dicts with avg_rating and rating_count.
+    """
+    sql = """
+        SELECT DISTINCT d.drink_id, d.drink_name,
+               COALESCE(ROUND(AVG(dr.rating)::numeric, 1), 0) AS avg_rating,
+               COUNT(dr.rating) AS rating_count
+        FROM Drinks d
+        LEFT JOIN DrinkRatings dr     ON d.drink_id = dr.drink_id
+        LEFT JOIN DrinkIngredients di ON d.drink_id = di.drink_id
+        LEFT JOIN Ingredients i       ON di.ingredient_id = i.ingredient_id
+        WHERE 1=1
+    """
+    params = []
+
+    if allergen_exclude and allergen_exclude != "None":
+        sql += """
+            AND d.drink_id NOT IN (
+                SELECT di2.drink_id
+                FROM DrinkIngredients di2
+                JOIN Ingredients i2 ON di2.ingredient_id = i2.ingredient_id
+                JOIN Allergens a    ON i2.allergy_id = a.allergen_id
+                WHERE a.allergen_name = %s
+            )
+        """
+        params.append(allergen_exclude)
+
+    if ingredient:
+        sql += " AND LOWER(i.ingredient_name) LIKE LOWER(%s)"
+        params.append(f"%{ingredient}%")
+
+    sql += " GROUP BY d.drink_id, d.drink_name"
+
+    if min_rating:
+        sql += " HAVING COALESCE(AVG(dr.rating), 0) >= %s"
+        params.append(float(min_rating))
+
+    sql += " ORDER BY avg_rating DESC, d.drink_name"
+
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql, params)
+            return cur.fetchall()
+
+
+def save_drink(user_id, drink_id):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO UserSavedDrinks (user_id, drink_id)
+                VALUES (%s, %s)
+                ON CONFLICT DO NOTHING
+            """, (user_id, drink_id))
+        conn.commit()
+
+
+def remove_saved_drink(user_id, drink_id):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                DELETE FROM UserSavedDrinks
+                WHERE user_id = %s AND drink_id = %s
+            """, (user_id, drink_id))
+        conn.commit()
+
+
+def get_saved_drinks(user_id):
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT d.drink_id, d.drink_name,
+                       COALESCE(ROUND(AVG(dr.rating)::numeric, 1), 0) AS avg_rating,
+                       COUNT(dr.rating) AS rating_count
+                FROM UserSavedDrinks usd
+                JOIN Drinks d ON usd.drink_id = d.drink_id
+                LEFT JOIN DrinkRatings dr ON d.drink_id = dr.drink_id
+                WHERE usd.user_id = %s
+                GROUP BY d.drink_id, d.drink_name
+                ORDER BY d.drink_name
+            """, (user_id,))
+            return cur.fetchall()
+
+
+def get_drink_shopping_list(user_id):
+    """
+    Consolidated shopping list from all saved drinks.
+    Sums identical ingredients and estimates total cost.
+    """
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT i.ingredient_name,
+                       SUM(di.quantity) AS total_quantity,
+                       i.unit,
+                       i.cost_per_unit,
+                       ROUND((SUM(di.quantity) * i.cost_per_unit)::numeric, 2) AS line_cost
+                FROM UserSavedDrinks usd
+                JOIN DrinkIngredients di ON usd.drink_id = di.drink_id
+                JOIN Ingredients i       ON di.ingredient_id = i.ingredient_id
+                WHERE usd.user_id = %s
+                GROUP BY i.ingredient_name, i.unit, i.cost_per_unit
+                ORDER BY i.ingredient_name
+            """, (user_id,))
+            return cur.fetchall()
 
 
 def get_saved_recipes(user_id):
