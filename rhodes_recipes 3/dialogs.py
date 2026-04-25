@@ -1,4 +1,3 @@
-"""Modal dialogs that show full recipe and drink detail."""
 from nicegui import ui
 
 import database as db
@@ -8,7 +7,6 @@ from widgets import star_display
 
 
 def open_recipe_dialog(recipe_id: int):
-    """Show recipe details, ingredients, recommended drinks, and actions."""
     recipe, ingredients, drinks = db.get_recipe_detail(recipe_id)
     if not recipe:
         return
@@ -17,29 +15,25 @@ def open_recipe_dialog(recipe_id: int):
         f"min-width:520px; max-width:700px; background:{CREAM}; "
         "border-radius:16px; overflow:scroll; padding:0;"
     ):
-        # Header strip
         ui.element("div").style(
             f"background:{RUST}; padding:20px 24px;"
         ).add_slot("default", f"""
             <span style="color:{CREAM}; font-size:1.4rem; font-weight:800;
             font-family:Georgia,serif;">{recipe['recipe_name']}</span><br>
             <span style="color:rgba(255,255,255,.75); font-size:0.85rem;">
-            {recipe['cuisine']} · {recipe['type']} · ⏱ {recipe['cook_time']} min</span>
+            {recipe['cuisine']} · {recipe['type']} · {recipe['cook_time']} min</span>
         """)
 
         with ui.column().style("padding:20px 24px; gap:14px;"):
-            # Rating
             avg = float(recipe.get("avg_rating") or 0)
             ui.label(f"{star_display(avg)}  ({recipe.get('rating_count',0)} ratings)").style(
                 f"color:{GOLD}; font-size:1.1rem;"
             )
 
-            # Description
             ui.label(recipe["description"]).style(
                 f"color:{BROWN}; font-size:0.95rem; line-height:1.6;"
             )
 
-            # Ingredients table
             ui.label("Ingredients").style(
                 f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
@@ -64,10 +58,9 @@ def open_recipe_dialog(recipe_id: int):
                 ]
                 ui.table(columns=cols, rows=rows).style("font-size:0.85rem;")
 
-            # Recommended drinks — clickable to see drink detail
             if drinks:
                 with ui.row().style("align-items:center; gap:8px; flex-wrap:wrap;"):
-                    ui.label("🍷 Pairs well with:").style(
+                    ui.label("Pairs well with:").style(
                         f"color:{SAGE}; font-weight:600; font-size:0.9rem;"
                     )
                     for d in drinks:
@@ -79,7 +72,6 @@ def open_recipe_dialog(recipe_id: int):
                             "text-decoration:underline; padding:0;"
                         )
 
-            # Cost info
             with ui.row().style("gap:24px; flex-wrap:wrap;"):
                 ui.label(f"Total cost: ${float(recipe['cost']):.2f}").style(
                     f"color:{GRAY}; font-size:0.85rem;"
@@ -91,14 +83,13 @@ def open_recipe_dialog(recipe_id: int):
                     f"color:{SAGE}; font-weight:600; font-size:0.85rem;"
                 )
 
-            # Action buttons
             with ui.row().style("gap:10px; margin-top:8px; flex-wrap:wrap;"):
                 if current_user["id"]:
                     def do_save(rid=recipe_id):
                         db.save_recipe(current_user["id"], rid)
-                        ui.notify("Recipe saved to your list! 🎉", color="positive")
+                        ui.notify("Recipe saved to your list!", color="positive")
 
-                    ui.button("💾 Save Recipe", on_click=do_save).style(
+                    ui.button("Save Recipe", on_click=do_save).style(
                         f"background:{SAGE}; color:{WHITE}; font-weight:600; border-radius:8px;"
                     )
 
@@ -107,7 +98,7 @@ def open_recipe_dialog(recipe_id: int):
 
                     def do_rate(rid=recipe_id):
                         db.rate_recipe(current_user["id"], rid, sel_rating.value)
-                        ui.notify("Rating submitted! ⭐", color="positive")
+                        ui.notify("Rating submitted!", color="positive")
 
                     ui.button("Submit Rating", on_click=do_rate).style(
                         f"background:{GOLD}; color:{BROWN}; font-weight:600; border-radius:8px;"
@@ -125,7 +116,6 @@ def open_recipe_dialog(recipe_id: int):
 
 
 def open_drink_dialog(drink_id: int):
-    """Show drink details, ingredients (with allergens), and actions."""
     drink, ingredients = db.get_drink_detail(drink_id)
     if not drink:
         return
@@ -133,24 +123,21 @@ def open_drink_dialog(drink_id: int):
         f"min-width:520px; max-width:700px; background:{CREAM}; "
         "border-radius:16px; overflow:scroll; padding:0;"
     ):
-        # Header strip (mirrors recipe dialog styling)
         ui.element("div").style(
             f"background:{SAGE}; padding:20px 24px;"
         ).add_slot("default", f"""
             <span style="color:{CREAM}; font-size:1.4rem; font-weight:800;
             font-family:Georgia,serif;">{drink['drink_name']}</span><br>
             <span style="color:rgba(255,255,255,.85); font-size:0.85rem;">
-            🥤 Beverage</span>
+            Beverage</span>
         """)
 
         with ui.column().style("padding:20px 24px; gap:14px;"):
-            # Rating
             avg = float(drink.get("avg_rating") or 0)
             ui.label(f"{star_display(avg)}  ({drink.get('rating_count', 0)} ratings)").style(
                 f"color:{GOLD}; font-size:1.1rem;"
             )
 
-            # Ingredients table (with cost + allergen, like recipes)
             ui.label("Ingredients").style(
                 f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
@@ -177,7 +164,6 @@ def open_drink_dialog(drink_id: int):
                 ]
                 ui.table(columns=cols, rows=rows).style("font-size:0.85rem;")
 
-            # Estimated total cost
             total_cost = sum(
                 float(i["quantity"]) * float(i["cost_per_unit"] or 0)
                 for i in ingredients
@@ -187,14 +173,13 @@ def open_drink_dialog(drink_id: int):
                     f"color:{SAGE}; font-weight:600; font-size:0.85rem;"
                 )
 
-            # Action buttons
             with ui.row().style("gap:10px; margin-top:8px; flex-wrap:wrap;"):
                 if current_user["id"]:
                     def do_save_drink(did=drink_id):
                         db.save_drink(current_user["id"], did)
-                        ui.notify("Drink saved to your list! 🥤", color="positive")
+                        ui.notify("Drink saved to your list!", color="positive")
 
-                    ui.button("💾 Save Drink", on_click=do_save_drink).style(
+                    ui.button("Save Drink", on_click=do_save_drink).style(
                         f"background:{SAGE}; color:{WHITE}; font-weight:600; border-radius:8px;"
                     )
 
@@ -203,7 +188,7 @@ def open_drink_dialog(drink_id: int):
 
                     def do_rate_drink(did=drink_id):
                         db.rate_drink(current_user["id"], did, sel_drink_rating.value)
-                        ui.notify("Rating submitted! ⭐", color="positive")
+                        ui.notify("Rating submitted!", color="positive")
 
                     ui.button("Submit Rating", on_click=do_rate_drink).style(
                         f"background:{GOLD}; color:{BROWN}; font-weight:600; border-radius:8px;"

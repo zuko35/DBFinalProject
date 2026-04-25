@@ -1,4 +1,3 @@
-"""Home page (`/`): browse Recipes and Drinks via tabs with filters."""
 from nicegui import ui
 
 import database as db
@@ -13,33 +12,26 @@ def show_home():
     header("Browse Recipes & Drinks")
 
     with ui.column().style("padding:24px 32px; gap:20px; max-width:1200px; margin:auto;"):
-
-        # ── Tab toggle ───────────────────────────────────────────────────────
         tabs = ui.tabs().style(
             f"color:{RUST}; background:{WHITE}; border-radius:12px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08); padding:4px;"
         )
         with tabs:
-            tab_recipes = ui.tab("🍴 Recipes")
-            tab_drinks  = ui.tab("🥤 Drinks")
+            tab_recipes = ui.tab("Recipes")
+            tab_drinks  = ui.tab("Drinks")
 
         with ui.tab_panels(tabs, value=tab_recipes).style("background:transparent; width:100%;"):
             _render_recipes_tab(tab_recipes)
             _render_drinks_tab(tab_drinks)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Tab content builders
-# ─────────────────────────────────────────────────────────────────────────────
-
 def _render_recipes_tab(tab):
     with ui.tab_panel(tab):
-        # ── Filter card (inputs only) ───────────────────────────────────────
         with ui.card().style(
             f"background:{WHITE}; border-radius:12px; padding:20px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08);"
         ):
-            ui.label("🔍 Filter Recipes").style(
+            ui.label("Filter Recipes").style(
                 f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
                 "font-family:'Georgia',serif; margin-bottom:12px;"
             )
@@ -62,7 +54,6 @@ def _render_recipes_tab(tab):
                     f"color:{RUST}; font-weight:600; border-radius:8px; padding:8px 16px;"
                 )
 
-        # ── Results section (own row, outside the filter card) ─────────────
         results_label = ui.label("All Recipes").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
             "font-family:'Georgia',serif; margin-top:16px;"
@@ -103,18 +94,16 @@ def _render_recipes_tab(tab):
             inp_time.set_value(None)
             populate(db.search_recipes(), filtered=False)
 
-        # Initial render — show every recipe
         populate(db.search_recipes(), filtered=False)
 
 
 def _render_drinks_tab(tab):
     with ui.tab_panel(tab):
-        # ── Filter card (inputs only) ───────────────────────────────────────
         with ui.card().style(
             f"background:{WHITE}; border-radius:12px; padding:20px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08);"
         ):
-            ui.label("🔍 Filter Drinks").style(
+            ui.label("Filter Drinks").style(
                 f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
                 "font-family:'Georgia',serif; margin-bottom:12px;"
             )
@@ -139,7 +128,6 @@ def _render_drinks_tab(tab):
                     f"color:{RUST}; font-weight:600; border-radius:8px; padding:8px 16px;"
                 )
 
-        # ── Results section (own row, outside the filter card) ─────────────
         d_results_label = ui.label("All Drinks").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
             "font-family:'Georgia',serif; margin-top:16px;"
@@ -176,5 +164,4 @@ def _render_drinks_tab(tab):
             d_sel_min_rating.set_value(0)
             populate_drinks(db.search_drinks(), filtered=False)
 
-        # Initial render — show every drink
         populate_drinks(db.search_drinks(), filtered=False)

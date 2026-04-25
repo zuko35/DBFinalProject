@@ -1,4 +1,3 @@
-"""Reusable UI components: header bar, star display, and item cards."""
 from nicegui import ui
 
 from theme import BROWN, CREAM, GOLD, GRAY, RUST, SAGE, WHITE
@@ -6,13 +5,12 @@ from state import current_user, do_logout
 
 
 def header(title_text: str):
-    """Top app bar with brand, page title, and auth-aware action buttons."""
     with ui.element("div").style(
         f"background:{BROWN}; padding:16px 32px; display:flex; "
         "align-items:center; justify-content:space-between; "
         "box-shadow:0 2px 8px rgba(0,0,0,.3);"
     ):
-        ui.label("🍴 Rhodes Recipes").style(
+        ui.label("Rhodes Recipes").style(
             f"color:{GOLD}; font-size:1.6rem; font-weight:800; "
             "font-family:'Georgia',serif; letter-spacing:1px;"
         )
@@ -21,7 +19,7 @@ def header(title_text: str):
         )
         with ui.row().style("gap:8px;"):
             if current_user["id"]:
-                ui.label(f"👤 {current_user['name']}").style(
+                ui.label(f"{current_user['name']}").style(
                     f"color:{GOLD}; font-size:0.9rem; align-self:center;"
                 )
                 ui.button("My Saved", on_click=lambda: ui.navigate.to("/saved")).props(
@@ -37,21 +35,18 @@ def header(title_text: str):
 
 
 def star_display(rating: float) -> str:
-    """Render a 0-5 numeric rating as ★/☆ characters."""
     full = int(rating)
     empty = 5 - full
     return "★" * full + "☆" * empty
 
 
 def recipe_card(recipe: dict, on_click_fn):
-    """Compact recipe card used in browse and search results."""
     stars = star_display(float(recipe.get("avg_rating") or 0))
     with ui.card().style(
         f"background:{WHITE}; border-radius:12px; width:280px; cursor:pointer; "
         "box-shadow:0 2px 10px rgba(0,0,0,.12); transition:transform .15s,box-shadow .15s; "
         "overflow:hidden; flex-shrink:0;"
     ).on("click", lambda r=recipe: on_click_fn(r["recipe_id"])):
-        # Coloured top strip by meal type
         type_colors = {
             "Breakfast": "#F4A261", "Lunch": SAGE,
             "Dinner": RUST,        "Dessert": "#C77DFF",
@@ -67,10 +62,10 @@ def recipe_card(recipe: dict, on_click_fn):
                 f"font-size:0.82rem; color:{GRAY}; line-height:1.4;"
             )
             with ui.row().style("justify-content:space-between; margin-top:4px;"):
-                ui.label(f"🍽 {recipe.get('type','')}  ·  {recipe.get('cuisine','')}").style(
+                ui.label(f"{recipe.get('type','')}  ·  {recipe.get('cuisine','')}").style(
                     f"font-size:0.78rem; color:{GRAY};"
                 )
-                ui.label(f"⏱ {recipe.get('cook_time','')} min").style(
+                ui.label(f"{recipe.get('cook_time','')} min").style(
                     f"font-size:0.78rem; color:{GRAY};"
                 )
             with ui.row().style("justify-content:space-between; margin-top:2px;"):
@@ -81,7 +76,6 @@ def recipe_card(recipe: dict, on_click_fn):
 
 
 def drink_card(drink: dict, on_click_fn):
-    """Compact drink card used in browse and search results."""
     stars = star_display(float(drink.get("avg_rating") or 0))
     with ui.card().style(
         f"background:{WHITE}; border-radius:12px; width:280px; cursor:pointer; "
@@ -94,7 +88,7 @@ def drink_card(drink: dict, on_click_fn):
                 f"font-size:1.05rem; font-weight:700; color:{BROWN}; "
                 "font-family:'Georgia',serif;"
             )
-            ui.label("🥤 Beverage").style(
+            ui.label("Beverage").style(
                 f"font-size:0.82rem; color:{GRAY}; line-height:1.4;"
             )
             with ui.row().style("justify-content:space-between; margin-top:6px;"):

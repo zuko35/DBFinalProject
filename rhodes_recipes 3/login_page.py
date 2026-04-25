@@ -1,4 +1,3 @@
-"""Login / Register page (`/login`)."""
 import time
 
 from nicegui import ui
@@ -21,7 +20,7 @@ def show_login_page():
             f"background:{WHITE}; border-radius:16px; padding:32px; "
             "box-shadow:0 4px 20px rgba(0,0,0,.12);"
         ):
-            ui.label("Welcome Back 🍴").style(
+            ui.label("Welcome Back").style(
                 f"font-size:1.5rem; font-weight:800; color:{BROWN}; "
                 "font-family:Georgia,serif; margin-bottom:8px;"
             )
@@ -35,14 +34,10 @@ def show_login_page():
                 _render_login_panel(tab_l)
                 _render_register_panel(tab_r)
 
-        ui.button("← Back to Browse", on_click=lambda: ui.navigate.to("/")).props(
+        ui.button("Back to Browse", on_click=lambda: ui.navigate.to("/")).props(
             "flat"
         ).style(f"color:{RUST}; align-self:center;")
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Tab content builders
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _render_login_panel(tab):
     with ui.tab_panel(tab):

@@ -1,4 +1,3 @@
-"""Saved page (`/saved`): user's saved recipes and drinks with shopping lists."""
 from nicegui import ui
 
 import database as db
@@ -27,27 +26,22 @@ def show_saved_page():
             ui.label("My Saved Items").style(
                 f"font-size:1.3rem; font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
-            ui.button("🏠 Back to Browse", on_click=lambda: ui.navigate.to("/")).style(
+            ui.button("Back to Browse", on_click=lambda: ui.navigate.to("/")).style(
                 f"background:{RUST}; color:{WHITE}; border-radius:8px; font-weight:600;"
             )
 
-        # ── Tabs: saved recipes / saved drinks ───────────────────────────
         s_tabs = ui.tabs().style(
             f"color:{RUST}; background:{WHITE}; border-radius:12px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08); padding:4px;"
         )
         with s_tabs:
-            s_tab_recipes = ui.tab(f"🍴 Recipes ({len(saved)})")
-            s_tab_drinks  = ui.tab(f"🥤 Drinks ({len(saved_drinks)})")
+            s_tab_recipes = ui.tab(f"Recipes ({len(saved)})")
+            s_tab_drinks  = ui.tab(f"Drinks ({len(saved_drinks)})")
 
         with ui.tab_panels(s_tabs, value=s_tab_recipes).style("background:transparent; width:100%;"):
             _render_saved_recipes(s_tab_recipes, saved, shopping)
             _render_saved_drinks(s_tab_drinks, saved_drinks, drink_shopping)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Tab content builders
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _render_saved_recipes(tab, saved, shopping):
     with ui.tab_panel(tab):
@@ -62,7 +56,7 @@ def _render_saved_recipes(tab, saved, shopping):
                             ui.label(r["recipe_name"]).style(
                                 f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
                             )
-                            ui.label(f"{r['cuisine']} · {r['type']} · ⏱ {r['cook_time']} min").style(
+                            ui.label(f"{r['cuisine']} · {r['type']} · {r['cook_time']} min").style(
                                 f"font-size:0.8rem; color:{GRAY};"
                             )
                             def do_remove(rid=r["recipe_id"]):
@@ -72,7 +66,7 @@ def _render_saved_recipes(tab, saved, shopping):
                                 f"color:{RUST}; font-size:0.8rem;"
                             )
 
-            ui.label("🛒 Recipe Shopping List").style(
+            ui.label("Recipe Shopping List").style(
                 f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
                 "font-family:Georgia,serif; margin-top:12px;"
             )
@@ -108,7 +102,7 @@ def _render_saved_drinks(tab, saved_drinks, drink_shopping):
                                 f"color:{RUST}; font-size:0.8rem;"
                             )
 
-            ui.label("🛒 Drinks Shopping List").style(
+            ui.label("Drinks Shopping List").style(
                 f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
                 "font-family:Georgia,serif; margin-top:12px;"
             )
@@ -121,7 +115,6 @@ def _render_saved_drinks(tab, saved_drinks, drink_shopping):
 
 
 def _shopping_list_card(items):
-    """Render a totals card for a consolidated shopping list."""
     total = sum(float(i.get("line_cost") or 0) for i in items)
     cols = [
         {"name": "ingredient", "label": "Ingredient", "field": "ingredient_name", "align": "left"},

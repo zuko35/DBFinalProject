@@ -9,14 +9,8 @@ def get_conn():
     )
 
 
-# ── Query functions (all hand-written SQL) ───────────────────────────────────
-
 def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
                    allergen_exclude=None, ingredient=None):
-    """
-    Filter recipes by cuisine, meal type, max cook time, excluded allergen,
-    or a key ingredient. Returns list of recipe dicts with avg rating.
-    """
     sql = """
         SELECT DISTINCT r.recipe_id, r.recipe_name, r.description,
                r.cuisine, r.type, r.cook_time, r.unit,
@@ -39,7 +33,6 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
         params.append(meal_type)
 
     if max_cook_time:
-        # cook_time is stored as text — strip non-digits, then cast for comparison.
         sql += (
             " AND NULLIF(regexp_replace(r.cook_time::text, '\\D', '', 'g'), '')"
             "::INTEGER <= %s"
@@ -71,10 +64,6 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
 
 
 def get_recipe_detail(recipe_id):
-    """
-    Return full recipe info, its ingredients (with allergen info),
-    and recommended drinks.
-    """
     with get_conn() as conn:
         with conn.cursor() as cur:
 
@@ -116,7 +105,6 @@ def get_recipe_detail(recipe_id):
 
 
 def get_drink_detail(drink_id):
-    """Return a drink's details, ingredients, and average rating."""
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -145,10 +133,6 @@ def get_drink_detail(drink_id):
 
 
 def search_drinks(ingredient=None, allergen_exclude=None, min_rating=None):
-    """
-    Filter drinks by key ingredient, excluded allergen, and minimum
-    average rating. Returns drink dicts with avg_rating and rating_count.
-    """
     sql = """
         SELECT DISTINCT d.drink_id, d.drink_name,
                COALESCE(ROUND(AVG(dr.rating)::numeric, 1), 0) AS avg_rating,
@@ -230,10 +214,6 @@ def get_saved_drinks(user_id):
 
 
 def get_drink_shopping_list(user_id):
-    """
-    Consolidated shopping list from all saved drinks.
-    Sums identical ingredients and estimates total cost.
-    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -268,10 +248,6 @@ def get_saved_recipes(user_id):
 
 
 def get_shopping_list(user_id):
-    """
-    Consolidated shopping list from all saved recipes.
-    Sums identical ingredients and estimates total cost.
-    """
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""

@@ -1,5 +1,3 @@
-"""Centralised color palette used across the app."""
-
 CREAM   = "#FDF6EC"
 RUST    = "#C0522B"
 RUST_LT = "#E8703A"
