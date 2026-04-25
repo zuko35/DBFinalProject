@@ -58,6 +58,9 @@ def _render_recipes_tab(tab):
                     f"background:{RUST}; color:{WHITE}; font-weight:600; "
                     "border-radius:8px; padding:8px 24px;"
                 )
+                ui.button("Clear Filters", on_click=lambda: clear_filters()).props("flat").style(
+                    f"color:{RUST}; font-weight:600; border-radius:8px; padding:8px 16px;"
+                )
 
         # ── Results section (own row, outside the filter card) ─────────────
         results_label = ui.label("All Recipes").style(
@@ -92,6 +95,14 @@ def _render_recipes_tab(tab):
                 filtered=True,
             )
 
+        def clear_filters():
+            sel_cuisine.set_value("All")
+            sel_type.set_value("All")
+            sel_allergen.set_value("None")
+            inp_ingredient.set_value("")
+            inp_time.set_value(None)
+            populate(db.search_recipes(), filtered=False)
+
         # Initial render — show every recipe
         populate(db.search_recipes(), filtered=False)
 
@@ -124,6 +135,9 @@ def _render_drinks_tab(tab):
                     f"background:{RUST}; color:{WHITE}; font-weight:600; "
                     "border-radius:8px; padding:8px 24px;"
                 )
+                ui.button("Clear Filters", on_click=lambda: clear_drink_filters()).props("flat").style(
+                    f"color:{RUST}; font-weight:600; border-radius:8px; padding:8px 16px;"
+                )
 
         # ── Results section (own row, outside the filter card) ─────────────
         d_results_label = ui.label("All Drinks").style(
@@ -155,6 +169,12 @@ def _render_drinks_tab(tab):
                 ),
                 filtered=True,
             )
+
+        def clear_drink_filters():
+            d_inp_ingredient.set_value("")
+            d_sel_allergen.set_value("None")
+            d_sel_min_rating.set_value(0)
+            populate_drinks(db.search_drinks(), filtered=False)
 
         # Initial render — show every drink
         populate_drinks(db.search_drinks(), filtered=False)
