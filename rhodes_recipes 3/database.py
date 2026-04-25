@@ -39,7 +39,11 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
         params.append(meal_type)
 
     if max_cook_time:
-        sql += " AND r.cook_time <= %s"
+        # cook_time is stored as text — strip non-digits, then cast for comparison.
+        sql += (
+            " AND NULLIF(regexp_replace(r.cook_time::text, '\\D', '', 'g'), '')"
+            "::INTEGER <= %s"
+        )
         params.append(int(max_cook_time))
 
     if allergen_exclude and allergen_exclude != "None":
