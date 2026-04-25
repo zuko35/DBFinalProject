@@ -34,6 +34,7 @@ def show_home():
 
 def _render_recipes_tab(tab):
     with ui.tab_panel(tab):
+        # ── Filter card (inputs only) ───────────────────────────────────────
         with ui.card().style(
             f"background:{WHITE}; border-radius:12px; padding:20px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08);"
@@ -53,42 +54,51 @@ def _render_recipes_tab(tab):
                 inp_ingredient = ui.input(placeholder="e.g. potatoes", label="Key Ingredient").style("min-width:160px;")
                 inp_time       = ui.number(label="Max Cook Time (min)", min=1, max=300, step=5).style("min-width:160px;")
 
-                results_row = ui.row().style("flex-wrap:wrap; gap:16px; margin-top:4px;")
-
-                def run_search():
-                    results_row.clear()
-                    recipes = db.search_recipes(
-                        cuisine          = sel_cuisine.value,
-                        meal_type        = sel_type.value,
-                        max_cook_time    = inp_time.value,
-                        allergen_exclude = sel_allergen.value,
-                        ingredient       = inp_ingredient.value or None,
-                    )
-                    with results_row:
-                        if recipes:
-                            for r in recipes:
-                                recipe_card(r, open_recipe_dialog)
-                        else:
-                            ui.label("No recipes found — try adjusting your filters.").style(
-                                f"color:{GRAY}; font-style:italic; padding:16px;"
-                            )
-
-                ui.button("Search", on_click=run_search).style(
+                ui.button("Search", on_click=lambda: run_search()).style(
                     f"background:{RUST}; color:{WHITE}; font-weight:600; "
                     "border-radius:8px; padding:8px 24px;"
                 )
 
-        ui.label("All Recipes").style(
+        # ── Results section (own row, outside the filter card) ─────────────
+        results_label = ui.label("All Recipes").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
             "font-family:'Georgia',serif; margin-top:16px;"
         )
-        with ui.row().style("flex-wrap:wrap; gap:16px;"):
-            for r in db.search_recipes():
-                recipe_card(r, open_recipe_dialog)
+        results_row = ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-start;")
+
+        def populate(recipes, *, filtered: bool):
+            results_row.clear()
+            results_label.set_text(
+                f"Search Results ({len(recipes)})" if filtered else "All Recipes"
+            )
+            with results_row:
+                if recipes:
+                    for r in recipes:
+                        recipe_card(r, open_recipe_dialog)
+                else:
+                    ui.label("No recipes found — try adjusting your filters.").style(
+                        f"color:{GRAY}; font-style:italic; padding:16px;"
+                    )
+
+        def run_search():
+            populate(
+                db.search_recipes(
+                    cuisine          = sel_cuisine.value,
+                    meal_type        = sel_type.value,
+                    max_cook_time    = inp_time.value,
+                    allergen_exclude = sel_allergen.value,
+                    ingredient       = inp_ingredient.value or None,
+                ),
+                filtered=True,
+            )
+
+        # Initial render — show every recipe
+        populate(db.search_recipes(), filtered=False)
 
 
 def _render_drinks_tab(tab):
     with ui.tab_panel(tab):
+        # ── Filter card (inputs only) ───────────────────────────────────────
         with ui.card().style(
             f"background:{WHITE}; border-radius:12px; padding:20px; "
             "box-shadow:0 2px 8px rgba(0,0,0,.08);"
@@ -110,33 +120,41 @@ def _render_drinks_tab(tab):
                     [0, 1, 2, 3, 4, 5], value=0, label="Min Avg Rating"
                 ).style("min-width:140px;")
 
-                d_results_row = ui.row().style("flex-wrap:wrap; gap:16px; margin-top:4px;")
-
-                def run_drink_search():
-                    d_results_row.clear()
-                    drinks = db.search_drinks(
-                        ingredient       = d_inp_ingredient.value or None,
-                        allergen_exclude = d_sel_allergen.value,
-                        min_rating       = d_sel_min_rating.value or None,
-                    )
-                    with d_results_row:
-                        if drinks:
-                            for d in drinks:
-                                drink_card(d, open_drink_dialog)
-                        else:
-                            ui.label("No drinks found — try adjusting your filters.").style(
-                                f"color:{GRAY}; font-style:italic; padding:16px;"
-                            )
-
-                ui.button("Search", on_click=run_drink_search).style(
+                ui.button("Search", on_click=lambda: run_drink_search()).style(
                     f"background:{RUST}; color:{WHITE}; font-weight:600; "
                     "border-radius:8px; padding:8px 24px;"
                 )
 
-        ui.label("All Drinks").style(
+        # ── Results section (own row, outside the filter card) ─────────────
+        d_results_label = ui.label("All Drinks").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
             "font-family:'Georgia',serif; margin-top:16px;"
         )
-        with ui.row().style("flex-wrap:wrap; gap:16px;"):
-            for d in db.search_drinks():
-                drink_card(d, open_drink_dialog)
+        d_results_row = ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-start;")
+
+        def populate_drinks(drinks, *, filtered: bool):
+            d_results_row.clear()
+            d_results_label.set_text(
+                f"Search Results ({len(drinks)})" if filtered else "All Drinks"
+            )
+            with d_results_row:
+                if drinks:
+                    for d in drinks:
+                        drink_card(d, open_drink_dialog)
+                else:
+                    ui.label("No drinks found — try adjusting your filters.").style(
+                        f"color:{GRAY}; font-style:italic; padding:16px;"
+                    )
+
+        def run_drink_search():
+            populate_drinks(
+                db.search_drinks(
+                    ingredient       = d_inp_ingredient.value or None,
+                    allergen_exclude = d_sel_allergen.value,
+                    min_rating       = d_sel_min_rating.value or None,
+                ),
+                filtered=True,
+            )
+
+        # Initial render — show every drink
+        populate_drinks(db.search_drinks(), filtered=False)
