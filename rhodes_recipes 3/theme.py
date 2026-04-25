@@ -1,0 +1,10 @@
+"""Centralised color palette used across the app."""
+
+CREAM   = "#FDF6EC"
+RUST    = "#C0522B"
+RUST_LT = "#E8703A"
+BROWN   = "#4A2C17"
+SAGE    = "#7A9E7E"
+GOLD    = "#D4A843"
+WHITE   = "#FFFFFF"
+GRAY    = "#6B6B6B"
