@@ -38,14 +38,14 @@ def header(title_text: str):
                 ui.label(f"👤 {current_user['name']}").style(
                     f"color:{GOLD}; font-size:0.9rem; align-self:center;"
                 )
-                ui.button("My Saved", on_click=show_saved_page).props(
+                ui.button("My Saved", on_click=lambda: ui.navigate.to("/saved")).props(
                     "flat dense"
                 ).style(f"color:{CREAM};")
                 ui.button("Logout", on_click=do_logout).props(
                     "flat dense"
                 ).style(f"color:{CREAM};")
             else:
-                ui.button("Login / Register", on_click=show_login_page).props(
+                ui.button("Login / Register", on_click=lambda: ui.navigate.to("/login")).props(
                     "flat dense"
                 ).style(f"color:{CREAM};")
 
