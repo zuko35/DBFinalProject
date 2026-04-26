@@ -22,7 +22,7 @@ def show_login_page():
         ):
             ui.label("Welcome Back").style(
                 f"font-size:1.5rem; font-weight:800; color:{BROWN}; "
-                "font-family:Georgia,serif; margin-bottom:8px;"
+                "font-family:'Playfair Display','Georgia',serif; margin-bottom:8px;"
             )
 
             tabs = ui.tabs().style(f"color:{RUST};")

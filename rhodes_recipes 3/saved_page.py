@@ -24,7 +24,7 @@ def show_saved_page():
 
         with ui.row().style("align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;"):
             ui.label("My Saved Items").style(
-                f"font-size:1.3rem; font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
+                f"font-size:1.3rem; font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif;"
             )
             ui.button("Back to Browse", on_click=lambda: ui.navigate.to("/")).style(
                 f"background:{RUST}; color:{WHITE}; border-radius:8px; font-weight:600;"
@@ -54,7 +54,7 @@ def _render_saved_recipes(tab, saved, shopping):
                     ):
                         with ui.column().style("padding:16px; gap:6px;"):
                             ui.label(r["recipe_name"]).style(
-                                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
+                                f"font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif;"
                             )
                             ui.label(f"{r['cuisine']} · {r['type']} · {r['cook_time']} min").style(
                                 f"font-size:0.8rem; color:{GRAY};"
@@ -68,7 +68,7 @@ def _render_saved_recipes(tab, saved, shopping):
 
             ui.label("Recipe Shopping List").style(
                 f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
-                "font-family:Georgia,serif; margin-top:12px;"
+                "font-family:'Playfair Display','Georgia',serif; margin-top:12px;"
             )
             if shopping:
                 _shopping_list_card(shopping)
@@ -89,7 +89,7 @@ def _render_saved_drinks(tab, saved_drinks, drink_shopping):
                     ):
                         with ui.column().style("padding:16px; gap:6px;"):
                             ui.label(d["drink_name"]).style(
-                                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
+                                f"font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif;"
                             )
                             stars = star_display(float(d.get("avg_rating") or 0))
                             ui.label(f"{stars}  ({d.get('rating_count', 0)} ratings)").style(
@@ -104,7 +104,7 @@ def _render_saved_drinks(tab, saved_drinks, drink_shopping):
 
             ui.label("Drinks Shopping List").style(
                 f"font-size:1.2rem; font-weight:700; color:{BROWN}; "
-                "font-family:Georgia,serif; margin-top:12px;"
+                "font-family:'Playfair Display','Georgia',serif; margin-top:12px;"
             )
             if drink_shopping:
                 _shopping_list_card(drink_shopping)
