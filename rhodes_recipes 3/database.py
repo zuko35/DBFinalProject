@@ -10,7 +10,7 @@ def get_conn():
 
 
 def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
-                   allergen_exclude=None, ingredient=None):
+                   allergen_exclude=None, ingredient=None, min_rating=None):
     sql = """
         SELECT DISTINCT r.recipe_id, r.recipe_name, r.description,
                r.cuisine, r.type, r.cook_time, r.unit,
@@ -55,7 +55,13 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
         sql += " AND LOWER(i.ingredient_name) LIKE LOWER(%s)"
         params.append(f"%{ingredient}%")
 
-    sql += " GROUP BY r.recipe_id ORDER BY avg_rating DESC, r.recipe_name"
+    sql += " GROUP BY r.recipe_id"
+
+    if min_rating:
+        sql += " HAVING COALESCE(AVG(rr.rating), 0) >= %s"
+        params.append(float(min_rating))
+
+    sql += " ORDER BY avg_rating DESC, r.recipe_name"
 
     with get_conn() as conn:
         with conn.cursor() as cur:

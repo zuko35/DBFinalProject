@@ -55,6 +55,7 @@ def _render_recipes_tab(tab):
                 sel_allergen   = ui.select(allergens,  value="None", label="Exclude Allergen").style("min-width:160px;")
                 inp_ingredient = ui.input(placeholder="e.g. potatoes", label="Key Ingredient").style("min-width:160px;")
                 inp_time       = ui.number(label="Max Cook Time (min)", min=1, max=300, step=5).style("min-width:160px;")
+                sel_min_rating = ui.select([0, 1, 2, 3, 4, 5], value=0, label="Min Avg Rating").style("min-width:140px;")
 
                 ui.button("Search", on_click=lambda: run_search()).style(
                     f"background:{RUST}; color:{WHITE}; font-weight:600; "
@@ -92,6 +93,7 @@ def _render_recipes_tab(tab):
                     max_cook_time    = inp_time.value,
                     allergen_exclude = sel_allergen.value,
                     ingredient       = inp_ingredient.value or None,
+                    min_rating       = sel_min_rating.value or None,
                 ),
                 filtered=True,
             )
@@ -102,6 +104,7 @@ def _render_recipes_tab(tab):
             sel_allergen.set_value("None")
             inp_ingredient.set_value("")
             inp_time.set_value(None)
+            sel_min_rating.set_value(0)
             populate(db.search_recipes(), filtered=False)
 
         populate(db.search_recipes(), filtered=False)
