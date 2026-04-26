@@ -1,9 +1,25 @@
+import re
+
 from nicegui import ui
 
 import database as db
 from theme import BROWN, CREAM, GOLD, GRAY, RUST, SAGE, WHITE
 from state import current_user
 from widgets import star_display
+
+
+def _parse_instructions(text: str):
+    if not text:
+        return []
+    pieces = re.split(r"\.\s+(?=\d+\.\s)", text.strip())
+    steps = []
+    for p in pieces:
+        p = p.strip()
+        p = re.sub(r"^\d+\.\s*", "", p)
+        p = p.rstrip(".")
+        if p:
+            steps.append(p)
+    return steps
 
 
 def open_recipe_dialog(recipe_id: int):
@@ -57,6 +73,27 @@ def open_recipe_dialog(recipe_id: int):
                     for i in ingredients
                 ]
                 ui.table(columns=cols, rows=rows).style("font-size:0.85rem;")
+
+            steps = _parse_instructions(recipe.get("instructions") or "")
+            if steps:
+                ui.label("Instructions").style(
+                    f"font-weight:700; color:{BROWN}; font-family:Georgia,serif; margin-top:4px;"
+                )
+                with ui.element("div").style(
+                    f"background:{WHITE}; border-radius:8px; padding:14px 18px; "
+                    "box-shadow:0 1px 4px rgba(0,0,0,.08);"
+                ):
+                    for idx, step in enumerate(steps, start=1):
+                        with ui.row().style(
+                            "gap:10px; align-items:flex-start; margin-bottom:8px; flex-wrap:nowrap;"
+                        ):
+                            ui.label(f"{idx}.").style(
+                                f"color:{RUST}; font-weight:700; min-width:22px; "
+                                "font-family:Georgia,serif;"
+                            )
+                            ui.label(step).style(
+                                f"color:{BROWN}; font-size:0.9rem; line-height:1.5;"
+                            )
 
             if drinks:
                 with ui.row().style("align-items:center; gap:8px; flex-wrap:wrap;"):
