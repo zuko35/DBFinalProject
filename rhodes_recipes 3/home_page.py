@@ -33,7 +33,7 @@ def _render_recipes_tab(tab):
         ):
             ui.label("Filter Recipes").style(
                 f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
-                "font-family:'Playfair Display','Georgia',serif; margin-bottom:12px;"
+                "font-family:'Georgia',serif; margin-bottom:12px;"
             )
             with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
                 cuisines   = ["All"] + db.get_cuisines()
@@ -56,7 +56,7 @@ def _render_recipes_tab(tab):
 
         results_label = ui.label("All Recipes").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
-            "font-family:'Playfair Display','Georgia',serif; margin-top:16px;"
+            "font-family:'Georgia',serif; margin-top:16px;"
         )
         results_row = ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-start;")
 
@@ -105,7 +105,7 @@ def _render_drinks_tab(tab):
         ):
             ui.label("Filter Drinks").style(
                 f"font-size:1.1rem; font-weight:700; color:{BROWN}; "
-                "font-family:'Playfair Display','Georgia',serif; margin-bottom:12px;"
+                "font-family:'Georgia',serif; margin-bottom:12px;"
             )
             with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
                 d_allergens = ["None"] + db.get_allergens()
@@ -130,7 +130,7 @@ def _render_drinks_tab(tab):
 
         d_results_label = ui.label("All Drinks").style(
             f"font-size:1.3rem; font-weight:700; color:{BROWN}; "
-            "font-family:'Playfair Display','Georgia',serif; margin-top:16px;"
+            "font-family:'Georgia',serif; margin-top:16px;"
         )
         d_results_row = ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-start;")
 

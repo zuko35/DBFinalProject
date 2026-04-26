@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from theme import BRAND_FONT, BROWN, CREAM, GOLD, GRAY, RUST, SAGE, SERIF_FONT, WHITE
+from theme import BROWN, CREAM, GOLD, GRAY, RUST, SAGE, WHITE
 from state import current_user, do_logout
 
 
@@ -26,33 +26,34 @@ def header(title_text: str):
         with ui.row().style("align-items:center; gap:14px;"):
             ui.html(SHIELD_SVG)
             with ui.column().style("gap:0;"):
-                ui.label("Rhodes Recipes").classes("brand-title").style(
-                    f"color:{CREAM}; font-size:1.65rem; line-height:1.1;"
+                ui.label("Rhodes Recipes").style(
+                    f"color:{CREAM}; font-size:1.65rem; line-height:1.1; "
+                    "font-family:'Georgia',serif; font-weight:800; letter-spacing:1.5px;"
                 )
                 ui.label("Est. 1848").style(
                     f"color:{GOLD}; font-size:0.7rem; letter-spacing:3px; "
-                    f"font-family:{SERIF_FONT}; text-transform:uppercase;"
+                    "font-family:'Georgia',serif; text-transform:uppercase;"
                 )
         ui.label(title_text).style(
             f"color:{CREAM}; font-size:1.05rem; font-style:italic; "
-            f"font-family:{SERIF_FONT}; opacity:0.85;"
+            "font-family:'Georgia',serif; opacity:0.85;"
         )
         with ui.row().style("gap:8px;"):
             if current_user["id"]:
                 ui.label(f"{current_user['name']}").style(
                     f"color:{GOLD}; font-size:0.95rem; align-self:center; "
-                    f"font-family:{SERIF_FONT};"
+                    "font-family:'Georgia',serif;"
                 )
                 ui.button("My Saved", on_click=lambda: ui.navigate.to("/saved")).props(
                     "flat dense"
-                ).style(f"color:{CREAM}; font-family:{SERIF_FONT}; letter-spacing:1px;")
+                ).style(f"color:{CREAM}; letter-spacing:1px;")
                 ui.button("Logout", on_click=do_logout).props(
                     "flat dense"
-                ).style(f"color:{CREAM}; font-family:{SERIF_FONT}; letter-spacing:1px;")
+                ).style(f"color:{CREAM}; letter-spacing:1px;")
             else:
                 ui.button("Login / Register", on_click=lambda: ui.navigate.to("/login")).props(
                     "flat dense"
-                ).style(f"color:{CREAM}; font-family:{SERIF_FONT}; letter-spacing:1px;")
+                ).style(f"color:{CREAM}; letter-spacing:1px;")
 
 
 def star_display(rating: float) -> str:
@@ -80,11 +81,10 @@ def recipe_card(recipe: dict, on_click_fn):
         with ui.column().style("padding:18px; gap:8px;"):
             ui.label(recipe["recipe_name"]).style(
                 f"font-size:1.15rem; font-weight:700; color:{BROWN}; "
-                f"font-family:{BRAND_FONT}; line-height:1.25;"
+                "font-family:'Georgia',serif; line-height:1.25;"
             )
             ui.label(recipe.get("description", "")[:90] + "…").style(
-                f"font-size:0.92rem; color:{GRAY}; line-height:1.45; "
-                f"font-family:{SERIF_FONT};"
+                f"font-size:0.92rem; color:{GRAY}; line-height:1.45;"
             )
             with ui.row().style("justify-content:space-between; margin-top:6px;"):
                 ui.label(f"{recipe.get('type','')}  ·  {recipe.get('cuisine','')}").style(
@@ -113,7 +113,7 @@ def drink_card(drink: dict, on_click_fn):
         with ui.column().style("padding:18px; gap:8px;"):
             ui.label(drink["drink_name"]).style(
                 f"font-size:1.15rem; font-weight:700; color:{BROWN}; "
-                f"font-family:{BRAND_FONT}; line-height:1.25;"
+                "font-family:'Georgia',serif; line-height:1.25;"
             )
             ui.label("Beverage").style(
                 f"font-size:0.78rem; color:{GRAY}; letter-spacing:2px; "

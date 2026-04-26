@@ -35,7 +35,7 @@ def open_recipe_dialog(recipe_id: int):
             f"background:{RUST}; padding:20px 24px;"
         ).add_slot("default", f"""
             <span style="color:{CREAM}; font-size:1.4rem; font-weight:800;
-            font-family:'Playfair Display','Georgia',serif;">{recipe['recipe_name']}</span><br>
+            font-family:Georgia,serif;">{recipe['recipe_name']}</span><br>
             <span style="color:rgba(255,255,255,.75); font-size:0.85rem;">
             {recipe['cuisine']} · {recipe['type']} · {recipe['cook_time']} min</span>
         """)
@@ -51,7 +51,7 @@ def open_recipe_dialog(recipe_id: int):
             )
 
             ui.label("Ingredients").style(
-                f"font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif;"
+                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
             with ui.element("div").style(
                 f"background:{WHITE}; border-radius:8px; overflow:hidden; "
@@ -77,7 +77,7 @@ def open_recipe_dialog(recipe_id: int):
             steps = _parse_instructions(recipe.get("instructions") or "")
             if steps:
                 ui.label("Instructions").style(
-                    f"font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif; margin-top:4px;"
+                    f"font-weight:700; color:{BROWN}; font-family:Georgia,serif; margin-top:4px;"
                 )
                 with ui.element("div").style(
                     f"background:{WHITE}; border-radius:8px; padding:14px 18px; "
@@ -89,7 +89,7 @@ def open_recipe_dialog(recipe_id: int):
                         ):
                             ui.label(f"{idx}.").style(
                                 f"color:{RUST}; font-weight:700; min-width:22px; "
-                                "font-family:'Playfair Display','Georgia',serif;"
+                                "font-family:Georgia,serif;"
                             )
                             ui.label(step).style(
                                 f"color:{BROWN}; font-size:0.9rem; line-height:1.5;"
@@ -164,7 +164,7 @@ def open_drink_dialog(drink_id: int):
             f"background:{SAGE}; padding:20px 24px;"
         ).add_slot("default", f"""
             <span style="color:{CREAM}; font-size:1.4rem; font-weight:800;
-            font-family:'Playfair Display','Georgia',serif;">{drink['drink_name']}</span><br>
+            font-family:Georgia,serif;">{drink['drink_name']}</span><br>
             <span style="color:rgba(255,255,255,.85); font-size:0.85rem;">
             Beverage</span>
         """)
@@ -176,7 +176,7 @@ def open_drink_dialog(drink_id: int):
             )
 
             ui.label("Ingredients").style(
-                f"font-weight:700; color:{BROWN}; font-family:'Playfair Display','Georgia',serif;"
+                f"font-weight:700; color:{BROWN}; font-family:Georgia,serif;"
             )
             with ui.element("div").style(
                 f"background:{WHITE}; border-radius:8px; overflow:hidden; "

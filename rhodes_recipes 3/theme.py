@@ -6,6 +6,3 @@ SAGE    = "#2C5F2D"
 GOLD    = "#C9A84A"
 WHITE   = "#FFFFFF"
 GRAY    = "#6B6B6B"
-
-BRAND_FONT = "'Playfair Display','Georgia','Times New Roman',serif"
-SERIF_FONT = "'Cormorant Garamond','Georgia','Times New Roman',serif"
