@@ -11,7 +11,8 @@ ui.add_head_html(
     'body{font-family:"Cormorant Garamond","Georgia",serif;}'
     '.brand-title{font-family:"Playfair Display","Georgia",serif;'
     'letter-spacing:1.5px;font-weight:800;}'
-    '</style>'
+    '</style>',
+    shared=True,
 )
 
 import home_page
