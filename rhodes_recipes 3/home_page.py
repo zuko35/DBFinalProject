@@ -8,7 +8,17 @@ from dialogs import open_recipe_dialog, open_drink_dialog
 
 @ui.page("/")
 def show_home():
-    ui.query("body").style(f"background:{CREAM}; margin:0;")
+    ui.query("body").style(f"background:{CREAM}; margin:0; padding:0;")
+
+    ui.add_head_html("""
+    <style>
+    .nicegui-content {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    </style>
+    """)
+
     header("Browse Recipes & Drinks")
 
     with ui.column().style("padding:24px 32px; gap:20px; max-width:1200px; margin:auto;"):

@@ -21,7 +21,7 @@ def header(title_text: str):
         f"background:{BROWN}; padding:14px 32px; display:flex; "
         "align-items:center; justify-content:space-between; "
         f"border-bottom:4px solid {RUST}; "
-        "box-shadow:0 2px 12px rgba(0,0,0,.35);"
+        "width:100vw; box-shadow:0 2px 12px rgba(0,0,0,.35);"
     ):
         with ui.row().style("align-items:center; gap:14px;"):
             ui.html(SHIELD_SVG)
