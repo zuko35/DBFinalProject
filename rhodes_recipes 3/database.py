@@ -10,7 +10,8 @@ def get_conn():
 
 
 def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
-                   allergen_exclude=None, ingredient=None, min_rating=None):
+                   allergen_exclude=None, ingredient=None, min_rating=None,
+                   recipe_name=None):
     sql = """
         SELECT DISTINCT r.recipe_id, r.recipe_name, r.description,
                r.cuisine, r.type, r.cook_time, r.unit,
@@ -33,10 +34,7 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
         params.append(meal_type)
 
     if max_cook_time:
-        sql += (
-            " AND NULLIF(regexp_replace(r.cook_time::text, '\\D', '', 'g'), '')"
-            "::INTEGER <= %s"
-        )
+        sql += " AND r.cook_time::INTEGER <= %s"
         params.append(int(max_cook_time))
 
     if allergen_exclude and allergen_exclude != "None":
@@ -54,6 +52,10 @@ def search_recipes(cuisine=None, meal_type=None, max_cook_time=None,
     if ingredient:
         sql += " AND LOWER(i.ingredient_name) LIKE LOWER(%s)"
         params.append(f"%{ingredient}%")
+
+    if recipe_name:
+        sql += " AND LOWER(r.recipe_name) LIKE LOWER(%s)"
+        params.append(f"%{recipe_name}%")
 
     sql += " GROUP BY r.recipe_id"
 
@@ -138,7 +140,8 @@ def get_drink_detail(drink_id):
     return drink, ingredients
 
 
-def search_drinks(ingredient=None, allergen_exclude=None, min_rating=None):
+def search_drinks(ingredient=None, allergen_exclude=None, min_rating=None,
+                  drink_name=None):
     sql = """
         SELECT DISTINCT d.drink_id, d.drink_name,
                COALESCE(ROUND(AVG(dr.rating)::numeric, 1), 0) AS avg_rating,
@@ -166,6 +169,10 @@ def search_drinks(ingredient=None, allergen_exclude=None, min_rating=None):
     if ingredient:
         sql += " AND LOWER(i.ingredient_name) LIKE LOWER(%s)"
         params.append(f"%{ingredient}%")
+
+    if drink_name:
+        sql += " AND LOWER(d.drink_name) LIKE LOWER(%s)"
+        params.append(f"%{drink_name}%")
 
     sql += " GROUP BY d.drink_id, d.drink_name"
 

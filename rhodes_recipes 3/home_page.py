@@ -50,6 +50,7 @@ def _render_recipes_tab(tab):
                 meal_types = ["All"] + db.get_meal_types()
                 allergens  = ["None"] + db.get_allergens()
 
+                inp_recipe_name = ui.input(placeholder="e.g. carbonara", label="Recipe Name").style("min-width:180px;")
                 sel_cuisine    = ui.select(cuisines,   value="All",  label="Cuisine").style("min-width:140px;")
                 sel_type       = ui.select(meal_types, value="All",  label="Meal Type").style("min-width:140px;")
                 sel_allergen   = ui.select(allergens,  value="None", label="Exclude Allergen").style("min-width:160px;")
@@ -94,6 +95,7 @@ def _render_recipes_tab(tab):
                     allergen_exclude = sel_allergen.value,
                     ingredient       = inp_ingredient.value or None,
                     min_rating       = sel_min_rating.value or None,
+                    recipe_name      = inp_recipe_name.value or None,
                 ),
                 filtered=True,
             )
@@ -105,6 +107,7 @@ def _render_recipes_tab(tab):
             inp_ingredient.set_value("")
             inp_time.set_value(None)
             sel_min_rating.set_value(0)
+            inp_recipe_name.set_value("")
             populate(db.search_recipes(), filtered=False)
 
         populate(db.search_recipes(), filtered=False)
@@ -123,6 +126,9 @@ def _render_drinks_tab(tab):
             with ui.row().style("flex-wrap:wrap; gap:16px; align-items:flex-end;"):
                 d_allergens = ["None"] + db.get_allergens()
 
+                d_inp_drink_name = ui.input(
+                    placeholder="e.g. latte", label="Drink Name"
+                ).style("min-width:180px;")
                 d_inp_ingredient = ui.input(
                     placeholder="e.g. lemon", label="Key Ingredient"
                 ).style("min-width:160px;")
@@ -167,11 +173,13 @@ def _render_drinks_tab(tab):
                     ingredient       = d_inp_ingredient.value or None,
                     allergen_exclude = d_sel_allergen.value,
                     min_rating       = d_sel_min_rating.value or None,
+                    drink_name       = d_inp_drink_name.value or None,
                 ),
                 filtered=True,
             )
 
         def clear_drink_filters():
+            d_inp_drink_name.set_value("")
             d_inp_ingredient.set_value("")
             d_sel_allergen.set_value("None")
             d_sel_min_rating.set_value(0)
